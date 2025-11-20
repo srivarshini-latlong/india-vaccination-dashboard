@@ -62,9 +62,9 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
-                <div className="flex justify-center mt-4 overflow-x-auto">
+                {/* <div className="flex justify-center mt-4 overflow-x-auto">
                   <Legend />
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
