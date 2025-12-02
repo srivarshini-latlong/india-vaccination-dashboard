@@ -3,8 +3,8 @@ import { useState } from "react";
 import IndiaMap from "../components/IndiaMap";
 import VaccinationChart from "../components/VaccinationChart";
 import Legend from "../components/Legend";
-import VaccinationInsights from "../components/VaccinationInsights";
-import ComparativeAnalysis from "../components/ComparativeAnalysis";
+// import VaccinationInsights from "../components/VaccinationInsights";
+// import ComparativeAnalysis from "../components/ComparativeAnalysis";
 
 export default function Dashboard() {
   const [highlighted, setHighlighted] = useState(null);
@@ -38,10 +38,10 @@ export default function Dashboard() {
             {/* Left Panels - Hidden on small screens */}
             <div className="hidden md:block md:col-span-2 xl:col-span-2 space-y-4">
               <div className="sticky top-4">
-                <VaccinationInsights highlighted={highlighted} />
+                {/* <VaccinationInsights highlighted={highlighted} /> */}
               </div>
               <div className="sticky top-[calc(100vh-500px)]">
-                <ComparativeAnalysis highlighted={highlighted} />
+                {/* <ComparativeAnalysis highlighted={highlighted} /> */}
               </div>
             </div>
 
@@ -55,13 +55,14 @@ export default function Dashboard() {
                   </p>
                 </div>
 
-                <div className="flex justify-center items-center min-h-[400px] sm:min-h-[500px] md:min-h-[600px] px-2">
-                <div className="w-full max-w-5xl mx-auto flex justify-center">
-                  <div className="w-full sm:w-[95%] md:w-[90%] lg:w-full">
-                    <IndiaMap highlighted={highlighted} setHighlighted={setHighlighted} />
-                  </div>
-                </div>
-              </div>
+                <div className="flex justify-center items-start px-2">
+  <div className="w-full max-w-5xl mx-auto flex justify-center">
+    <div className="w-full sm:w-[95%] md:w-[90%] lg:w-full">
+      <IndiaMap highlighted={highlighted} setHighlighted={setHighlighted} />
+    </div>
+  </div>
+</div>
+
                 {/* <div className="flex justify-center mt-4 overflow-x-auto">
                   <Legend />
                 </div> */}
@@ -71,8 +72,8 @@ export default function Dashboard() {
 
           {/* Mobile Panels - Shown only on small screens */}
           <div className="block md:hidden space-y-4 mb-6">
-            <VaccinationInsights highlighted={highlighted} />
-            <ComparativeAnalysis highlighted={highlighted} />
+            {/* <VaccinationInsights highlighted={highlighted} /> */}
+            {/* <ComparativeAnalysis highlighted={highlighted} /> */}
           </div>
 
           {/* Bottom Section: Chart */}
