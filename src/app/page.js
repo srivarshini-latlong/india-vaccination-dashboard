@@ -71,15 +71,15 @@ export default function Dashboard() {
           </div>
 
           {/* Mobile Panels - Shown only on small screens */}
-          <div className="block md:hidden space-y-4 mb-6">
+          {/* <div className="block md:hidden space-y-4 mb-6"> */}
             {/* <VaccinationInsights highlighted={highlighted} /> */}
             {/* <ComparativeAnalysis highlighted={highlighted} /> */}
-          </div>
+          {/* </div> */}
 
           {/* Bottom Section: Chart */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-6 border border-white/20 overflow-x-auto">
-            <VaccinationChart highlighted={highlighted} />
-          </div>
+          {/* <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-6 border border-white/20 overflow-x-auto"> */}
+            {/* <VaccinationChart highlighted={highlighted} /> */}
+          {/* </div> */}
         </div>
 
         {/* Footer */}

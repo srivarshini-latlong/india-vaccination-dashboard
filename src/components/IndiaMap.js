@@ -38,7 +38,7 @@ export default function IndiaMap({ highlighted, setHighlighted }) {
 
   /* 📌 Load SVG */
   useEffect(() => {
-    fetch("/india.final.svg")
+    fetch("/india.layer1.svg")
       .then((res) => res.text())
       .then((svg) => setSvgContent(svg));
   }, []);
@@ -321,9 +321,7 @@ console.log("updatedSvg generated?", updatedSvg.length);
       {/* SVG */}
       {svgContent && (
         <div
-          className={`w-full ${
-            isMobile ? "max-w-full aspect-[1.2/1]" : "max-w-full aspect-[1.3/1]"
-          }`}
+          className="w-full max-w-[800px] mx-auto"
           dangerouslySetInnerHTML={{ __html: updatedSvg }}
           
           onMouseMove={handleMouseMove}
@@ -336,7 +334,9 @@ console.log("updatedSvg generated?", updatedSvg.length);
       )}
 
       {/* Color palettes */}
-      <div className="mt-32 p-2 rounded bg-white/800 text-white backdrop-blur max-w-xl mx-auto">
+      <div className="absolute top-4 right-4 z-40 bg-slate-900/85 backdrop-blur-md 
+rounded-lg p-2 border border-white/20 shadow-xl w-36">
+
         <p className="text-sm text-white text-center font-semibold mb-2">
           Choose Color Palette
         </p>
@@ -347,7 +347,7 @@ console.log("updatedSvg generated?", updatedSvg.length);
               <div
                 key={name}
                 onClick={() => setPalette(name)}
-                className={`cursor-pointer rounded-lg p-1 border ${
+                className={`cursor-pointer rounded-lg p-1 border text-white ${
                   palette === name ? "border-white" : "border-gray-600"
                 }`}
               >
@@ -388,7 +388,7 @@ console.log("updatedSvg generated?", updatedSvg.length);
                 ×
               </button>
             </div>
-            <StatePieChart data={tooltip.data} />
+            {/* <StatePieChart data={tooltip.data} /> */}
           </div>
         </>
       )}
