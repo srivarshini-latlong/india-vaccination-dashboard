@@ -1,5 +1,5 @@
 "use client";
-import vaccinationData from "../data/vaccinationData";
+import vaccinationData from "../data/dataset";
 
 export default function VaccinationInsights({ highlighted }) {
   // Calculate meaningful insights from your data

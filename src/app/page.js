@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import IndiaMap from "../components/IndiaMap";
 import VaccinationChart from "../components/VaccinationChart";
 import Legend from "../components/Legend";
@@ -8,17 +8,21 @@ import Legend from "../components/Legend";
 
 export default function Dashboard() {
   const [highlighted, setHighlighted] = useState(null);
+  const [activeLayer, setActiveLayer] = useState("layer1");
+  useEffect(() => {
+  setHighlighted(null);
+}, [activeLayer]);
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-emerald-900 relative overflow-hidden">
+    <main className="min-h-screen bg-gradient-to-br from-white-900 via-gray-900 to-white-900 relative overflow-hidden">
       {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-emerald-900">
+      {/* <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900 to-emerald-900">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
           <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-emerald-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-1000"></div>
           <div className="absolute bottom-1/4 left-1/3 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-2000"></div>
         </div>
-      </div>
+      </div> */}
 
       <div className="relative z-10">
         {/* Header */}
@@ -27,7 +31,8 @@ export default function Dashboard() {
             India Vaccination Dashboard
           </h1>
           <p className="text-base sm:text-lg text-gray-300 max-w-3xl mx-auto">
-            Interactive visualization of COVID-19 vaccination coverage across Indian states
+            Interactive visualization of COVID-19 vaccination coverage across
+            Indian states
           </p>
         </div>
 
@@ -49,19 +54,49 @@ export default function Dashboard() {
             <div className="col-span-1 md:col-span-4 xl:col-span-10">
               <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-4 border border-white/20">
                 <div className="text-center mb-4">
-                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Interactive State Map</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
+                    Interactive State Map
+                  </h2>
                   <p className="text-sm sm:text-base text-gray-300">
                     Hover over any state to view detailed vaccination data
                   </p>
                 </div>
 
+                <div className="flex justify-center gap-3 my-5">
+                  <button
+                    onClick={() => setActiveLayer("layer1")}
+                    className={`px-4 py-2 rounded-md border ${
+                      activeLayer === "layer1"
+                        ? "bg-blue-600 text-white"
+                        : "bg-white"
+                    }`}
+                  >
+                    Layer 1
+                  </button>
+
+                  <button
+                    onClick={() => setActiveLayer("layer2")}
+                    className={`px-4 py-2 rounded-md border ${
+                      activeLayer === "layer2"
+                        ? "bg-blue-600 text-white"
+                        : "bg-white"
+                    }`}
+                  >
+                    Layer 2
+                  </button>
+                </div>
+
                 <div className="flex justify-center items-start px-2">
-  <div className="w-full max-w-5xl mx-auto flex justify-center">
-    <div className="w-full sm:w-[95%] md:w-[90%] lg:w-full">
-      <IndiaMap highlighted={highlighted} setHighlighted={setHighlighted} />
-    </div>
-  </div>
-</div>
+                  <div className="w-full max-w-5xl mx-auto flex justify-center">
+                    <div className="w-full sm:w-[95%] md:w-[90%] lg:w-full">
+                      <IndiaMap
+                        layer={activeLayer}
+                        highlighted={highlighted}
+                        setHighlighted={setHighlighted}
+                      />
+                    </div>
+                  </div>
+                </div>
 
                 {/* <div className="flex justify-center mt-4 overflow-x-auto">
                   <Legend />
@@ -72,13 +107,13 @@ export default function Dashboard() {
 
           {/* Mobile Panels - Shown only on small screens */}
           {/* <div className="block md:hidden space-y-4 mb-6"> */}
-            {/* <VaccinationInsights highlighted={highlighted} /> */}
-            {/* <ComparativeAnalysis highlighted={highlighted} /> */}
+          {/* <VaccinationInsights highlighted={highlighted} /> */}
+          {/* <ComparativeAnalysis highlighted={highlighted} /> */}
           {/* </div> */}
 
           {/* Bottom Section: Chart */}
           {/* <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-6 border border-white/20 overflow-x-auto"> */}
-            {/* <VaccinationChart highlighted={highlighted} /> */}
+          {/* <VaccinationChart highlighted={highlighted} /> */}
           {/* </div> */}
         </div>
 
@@ -91,4 +126,7 @@ export default function Dashboard() {
       </div>
     </main>
   );
+  
 }
+
+

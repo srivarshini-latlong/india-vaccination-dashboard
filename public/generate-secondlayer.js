@@ -1,103 +1,86 @@
+#!/usr/bin/env node
+// generate-secondlayer.js
 const fs = require("fs");
-const { JSDOM } = require("jsdom");
+const path = require("path");
 
-const input = process.argv[2];
-if (!input) {
-  console.error("❌ Usage: node generate-secondlayer.js <svg_file>");
+if (process.argv.length < 3) {
+  console.error("❌ Usage: node generate-secondlayer.js <input.svg>");
   process.exit(1);
 }
 
-// ---------- STEP 1: READ FILE ----------
-const raw = fs.readFileSync(input, "utf8");
+const inputSvgPath = process.argv[2];
+const svgContent = fs.readFileSync(inputSvgPath, "utf8");
 
-// Remove XML header if present
-let svg = raw.replace(/<\?xml[^>]*?>/g, "");
+console.log("🔍 Scanning SVG for region ids and names...");
 
-const dom = new JSDOM(svg, { contentType: "image/svg+xml" });
-const doc = dom.window.document;
-const svgRoot = doc.querySelector("svg");
+let regions = [];
+let seen = new Set();
 
-if (!svgRoot) {
-  console.error("❌ ERROR: No <svg> tag found in input.");
-  process.exit(1);
-}
+// Detect g/path containing id + name (Ex: id="KL" name="Kerala")
+const regex = /(?:<g[^>]*id="([^"]+)"[^>]*name="([^"]+)"|<path[^>]*id="([^"]+)"[^>]*name="([^"]+)")/g;
+let match;
 
-// ---------- STEP 2: REMOVE nested <svg> ----------
-doc.querySelectorAll("svg svg").forEach((nested) => {
-  const g = doc.createElement("g");
-  for (let i = 0; i < nested.attributes.length; i++) {
-    const attr = nested.attributes[i];
-    if (!["width", "height"].includes(attr.name)) {
-      g.setAttribute(attr.name, attr.value);
-    }
+while ((match = regex.exec(svgContent)) !== null) {
+  const id = match[1] || match[3];
+  const name = match[2] || match[4];
+  if (!seen.has(id)) {
+    seen.add(id);
+    regions.push({ id, name });
   }
-  g.innerHTML = nested.innerHTML;
-  nested.replaceWith(g);
+}
+
+console.log(`✔ ${regions.length} regions detected`);
+
+const dataFolder = path.join(__dirname, "data");
+if (!fs.existsSync(dataFolder)) fs.mkdirSync(dataFolder);
+
+// ---------- Save layer2_regions.js ----------
+const regionsJsPath = path.join(dataFolder, "layer2_regions.js");
+fs.writeFileSync(
+  regionsJsPath,
+  "export default " + JSON.stringify(regions, null, 2) + ";\n"
+);
+console.log(`✔ regions saved → data/layer2_regions.js`);
+
+
+// ---------- Generate dataset ----------
+function random(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// realistic vaccination style values
+const dataset = regions.map(r => ({
+  regionId: r.id,
+  totalVaccinated: random(1_500_000, 12_000_000),
+  fullyVaccinated: random(700_000, 8_000_000),
+  partiallyVaccinated: random(200_000, 4_000_000),
+}));
+
+const datasetPath = path.join(dataFolder, "secondlayer_vaccinationData.js");
+fs.writeFileSync(
+  datasetPath,
+  "export default " + JSON.stringify(dataset, null, 2) + ";\n"
+);
+console.log(`✔ dataset saved → data/secondlayer_vaccinationData.js`);
+
+
+// ---------- Rewrite SVG with proper attributes ----------
+let modifiedSvg = svgContent
+  .replace(/stroke-width="[^"]*"/g, 'stroke-width="0.3"')
+  .replace(/stroke="none"/g, 'stroke="#555"')
+  .replace(/fill="[^"]*"/g, 'fill="#E5E7EB"') // light gray default
+  .replace(/class="[^"]*"/g, "") // remove conflicting classes
+  .replace(/data-id="[^"]*"/g, ""); // clean before rewrite
+
+// Insert data-id="<regionId>" for each <path> or <g> id
+regions.forEach(r => {
+  const regexId = new RegExp(`id="${r.id}"`);
+  modifiedSvg = modifiedSvg.replace(regexId, `id="${r.id}" data-id="${r.id}"`);
 });
 
-// ---------- STEP 3: CLEAN STYLES + FORCE RESPONSIVE ----------
-const styleTag = doc.querySelector("style");
-if (styleTag) styleTag.textContent = "";
+// Save the output SVG beside the script
+const svgOutputPath = path.join(__dirname, "india.layer2.svg");
+fs.writeFileSync(svgOutputPath, modifiedSvg);
+console.log(`✔ SVG saved → ${svgOutputPath}`);
 
-svgRoot.removeAttribute("width");
-svgRoot.removeAttribute("height");
-
-if (!svgRoot.getAttribute("viewBox") && !svgRoot.getAttribute("viewbox")) {
-  svgRoot.setAttribute("viewBox", "0 0 700 650");
-}
-
-svgRoot.setAttribute("class", "w-full h-auto max-w-full");
-svgRoot.setAttribute("preserveAspectRatio", "xMidYMid meet");
-
-// ---------- STEP 4: AUTO-DETECT REGIONS ----------
-const allPaths = [...doc.querySelectorAll("path, polygon, polyline")];
-let regionId = 1;
-const regions = [];
-
-for (const el of allPaths) {
-  let bbox;
-  try {
-    bbox = el.getBBox();
-  } catch {
-    continue;
-  }
-
-  const id = String(regionId++);
-  el.setAttribute("data-id", id);
-  el.setAttribute("stroke", "#ffffff");
-  el.setAttribute("stroke-width", "0.7");
-
-  regions.push({
-    id,
-    bbox: {
-      x: bbox.x,
-      y: bbox.y,
-      width: bbox.width,
-      height: bbox.height,
-      cx: bbox.x + bbox.width / 2,
-      cy: bbox.y + bbox.height / 2,
-    },
-  });
-}
-
-// ---------- STEP 5: EXPORT CLEAN SVG ----------
-const serialized = svgRoot.outerHTML;
-const outSvg = input.replace(".svg", ".final.svg");
-fs.writeFileSync(outSvg, serialized, "utf8");
-
-// ---------- STEP 6: EXPORT regions.js ----------
-const outRegions = input.replace(".svg", ".regions.js");
-fs.writeFileSync(
-  outRegions,
-  `// Auto-generated region metadata for ${input}
-const regions = ${JSON.stringify(regions, null, 2)};
-export default regions;
-`,
-  "utf8"
-);
-
-// ---------- DONE ----------
-console.log("✨ SECOND LAYER READY");
-console.log("📌 Clean SVG :", outSvg);
-console.log("📌 Regions   :", outRegions);
-console.log("🟢 Total Regions:", regions.length);
+console.log("\n🎉 DONE — Layer-2 generation completed successfully\n");

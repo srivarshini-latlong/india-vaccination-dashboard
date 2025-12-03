@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-import vaccinationData from "../data/vaccinationData";
+import vaccinationData from "../data/dataset";
 import { useEffect, useState } from "react";
 
 export default function VaccinationChart({ highlighted }) {

@@ -1,5 +1,5 @@
 "use client";
-import vaccinationData from "../data/vaccinationData";
+import vaccinationData from "../data/dataset";
 
 export default function ComparativeAnalysis({ highlighted }) {
   const allValues = Object.values(vaccinationData).map(state => state.overall);

@@ -1,9 +1,11 @@
 "use client";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import vaccinationData from "../data/vaccinationData.js";
+import layer1dataset from "../data/dataset.js";
+import layer2dataset from "../data/secondlayer_vaccinationData.js";
 
-export default function IndiaMap({ highlighted, setHighlighted }) {
+
+export default function IndiaMap({ layer, highlighted, setHighlighted }) {
   const [svgContent, setSvgContent] = useState("");
   const [selectedState, setSelectedState] = useState(null);
   const [tooltip, setTooltip] = useState({
@@ -28,6 +30,10 @@ export default function IndiaMap({ highlighted, setHighlighted }) {
     bluemint: ["#1AA850", "#88D8A9", "#F6BE7A", "#82A7D6", "#4380C2"],
   };
 
+  const dataset =
+  layer === "layer1" ? layer1dataset : layer2dataset;
+
+
   /* 📌 Window size listener — always a hook */
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -37,11 +43,21 @@ export default function IndiaMap({ highlighted, setHighlighted }) {
   }, []);
 
   /* 📌 Load SVG */
-  useEffect(() => {
-    fetch("/india.layer1.svg")
-      .then((res) => res.text())
-      .then((svg) => setSvgContent(svg));
-  }, []);
+ /* 📌 Load SVG based on active layer */
+useEffect(() => {
+  const file =
+    layer === "layer1"
+      ? "/india.layer1.svg"
+      : "/india.layer2.svg"; // <-- your second generated map
+
+  fetch(file)
+    .then((res) => res.text())
+    .then((svg) => setSvgContent(svg));
+
+  setSelectedState(null);
+  setHighlighted(null);
+}, [layer]);
+
 
   /* 📌 Click outside to reset */
   useEffect(() => {
@@ -65,7 +81,7 @@ export default function IndiaMap({ highlighted, setHighlighted }) {
   }, [setHighlighted]);
 
   /* 🎨 Color scale */
-  const values = Object.values(vaccinationData).map((d) => d.value);
+  const values = Object.values(dataset).map((d) => d.value);
 
   const min = Math.min(...values);
   const max = Math.max(...values);
@@ -94,7 +110,7 @@ if (styleTag) {
   styleTag.textContent = ""; // keep tag, but empty it
 }
 
-    const paths = xml.querySelectorAll("[data-id]");
+    const paths = xml.querySelectorAll("[data-id], [id], [class]");
 
 
 
@@ -104,7 +120,7 @@ if (styleTag) {
     const className = el.getAttribute("class");
     if (className) id = className.trim();
   }
-  if (!vaccinationData[id]) {
+  if (!dataset[id]) {
   el.setAttribute("fill", "#e5e7eb"); // light gray
   el.setAttribute("stroke", "#ffffff");
   el.setAttribute("stroke-width", "0.4");
@@ -113,7 +129,7 @@ if (styleTag) {
 
 
 
-      const d = vaccinationData[id];
+      const d = dataset[id];
       const isSelected = selectedState === id;
       const isHighlighted = highlighted === id;
 
@@ -201,9 +217,9 @@ return result;
   const handleMouseMove = (e) => {
     if (isMobile || selectedState) return;
     const stateId = e.target.getAttribute("data-id");
-    if (!stateId || !vaccinationData[stateId]) return;
+    if (!stateId || !dataset[stateId]) return;
 
-    const stateData = vaccinationData[stateId];
+    const stateData = dataset[stateId];
     setHighlighted(stateId);
 
     const rect = e.currentTarget.getBoundingClientRect();
@@ -231,7 +247,7 @@ return result;
 
   /* 👆 Click */
   const handleStateClick = (stateId) => {
-    const stateData = vaccinationData[stateId];
+    const stateData = dataset[stateId];
     if (!stateData) return;
 
     const deselect = selectedState === stateId;
@@ -328,7 +344,7 @@ console.log("updatedSvg generated?", updatedSvg.length);
           onMouseLeave={handleMouseLeave}
           onClick={(e) => {
             const id = e.target.getAttribute("data-id");
-            if (id && vaccinationData[id]) handleStateClick(id);
+            if (id && dataset[id]) handleStateClick(id);
           }}
         />
       )}
